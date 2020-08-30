@@ -5,6 +5,7 @@ const GrowStocksUser = require("./GrowStocksUser");
 const FormData = require("form-data"); 
 const Transaction = require("./Transaction");
 const { EventEmitter } = require("events");
+
 /**
  * Represents a growstocks client.
  * @constructor
@@ -49,6 +50,7 @@ class GrowStocksClient extends EventEmitter {
 
     /**
      * This growstocks client's redirect url.
+     * @type {string}
      */
     this.redirectURL = options.redirectURL || null;
 
@@ -63,6 +65,12 @@ class GrowStocksClient extends EventEmitter {
      * @type {string}
      */
     this.payRedirectURL = options.payRedirectURL || null; 
+
+    /**
+     * The developer's account balance.
+     * @type {number}
+     */
+    this.balance = null;
 
     if ([
       this.organisation,
@@ -99,15 +107,17 @@ class GrowStocksClient extends EventEmitter {
     if (userData.success) {
       return new GrowStocksUser(userData, authToken, this);
     } else {
-      this.emit("error", {
+      const errorObj = {
+        error: true,
         location: `${Endpoints.auth.base}${Endpoints.auth.user}`,
         method: "post",
         reason: userData.reason,
         params: {
           token: authToken 
         }
-      });
-      return null;
+      };
+      this.emit("error", errorObj);
+      return errorObj;
     }
   }
 
@@ -138,15 +148,93 @@ class GrowStocksClient extends EventEmitter {
     if (reqRes.success) {
       return new Transaction(reqRes, this);
     } else {
-      this.emit("error", {
+      const errorObj = {
+        error: true,
         location: `${Endpoints.pay.base}${Endpoints.pay.getTransaction}`,
         method: "post",
         reason: reqRes.reason,
         params: {
           transactionid 
         }
-      });
-      return null;
+      };
+      this.emit("error", errorObj);
+      return errorObj;
+    }
+  }
+
+  /**
+   * Pay an user a certain amount of world locks.
+   * @param {number} uid The growstocks user id of the user you want to send world locks to.
+   * @param {number} amount The amount of world locks you want to send.
+   * @param {string} note The note you want to include. (Optional; max 50 chars)
+   * @returns {Transaction} A transaction with all the details.
+   */
+  async pay (uid, amount, note = "") {
+    if (isNaN(uid) && isNaN(parseInt(uid))) throw new Error("The user id format you want to pay is invalid.");
+    if (!this.scopes.includes("balance")) throw new Error("To use the pay function, make sure you include balance scope.");
+    if (!amount || isNaN(amount)) throw new TypeError("You must provide avalid number as amount to pay.");
+    if (note.length > 50) {
+      note = note.split("").slice(0, 46).join(" ") + "...";
+      this.client.emit("warn", `WARNING: Note for paying user with id ${this.id} (${this.name}) is larger than 50 characters (limit enforced by the api) so it's been trimed down to 50 characters.`);
+    }
+
+    const body = new FormData();
+    body.append("secret", this.secret);
+    body.append("party", uid);
+    body.append("amount", amount);
+    body.append("notes", note);
+
+    const request = new Request("post", `${Endpoints.pay.base}${Endpoints.pay.send}`, {
+      body: body
+    });
+
+    const response = await this.manager.push(request);
+
+    if (response.success) {
+      this.balance = response.balance;
+      return await this.getTransaction(response.transaction);
+    } else {
+      const errorObj = {
+        error: true,
+        location: `${Endpoints.pay.base}${Endpoints.pay.send}`,
+        method: "post",
+        reason: response.reason,
+        params: {
+          uid,
+          amount,
+          note
+        }  
+      };
+      this.emit("error", errorObj);
+      return errorObj;
+    }
+  }
+
+  /**
+   * Sets the balance property of itself to the output of the API and returns it.
+   */
+  async getBalance () {
+    const body = new FormData();
+    body.append("secret", this.secret);
+
+    const request = new Request("post", `${Endpoints.pay.base}${Endpoints.pay.balance}`, {
+      body: body
+    });
+    const response = await this.manager.push(request);
+
+    if (response.success) {
+      this.balance = response.balance;
+      return this.balance;
+    } else {
+      const errorObj = {
+        error: true,
+        location: `${Endpoints.pay.base}${Endpoints.pay.balance}`,
+        method: "post",
+        reason: response.reason,
+        params: {}
+      };
+      this.emit("error", errorObj);
+      return errorObj;
     }
   }
 }

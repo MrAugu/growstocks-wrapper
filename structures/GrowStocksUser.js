@@ -70,7 +70,7 @@ class GrowStocksUser {
     requestBody.append("secret", this.client.secret);
     requestBody.append("user", this.id);
     requestBody.append("amount", amount);
-    requestBody.append("note", note);
+    requestBody.append("notes", note);
 
     const transactionRequest = new Request("post", `${Endpoints.pay.base}${Endpoints.pay.createTransaction}`, {
       body: requestBody
@@ -84,7 +84,8 @@ class GrowStocksUser {
         userRedirectURL: Endpoints.pay.authorize(this.client.clientCode, this.client.payRedirectURL, requestResponse.transaction)
       };
     } else {
-      this.client.emit("error", {
+      const errorObj = {
+        error: true,
         location: `${Endpoints.pay.base}${Endpoints.pay.createTransaction}`,
         method: "post",
         reason: requestResponse.reason,
@@ -93,8 +94,10 @@ class GrowStocksUser {
           amount,
           note
         }
-      });
-      return null;
+      };
+
+      this.client.emit("error", errorObj);
+      return errorObj;
     }
   }
 

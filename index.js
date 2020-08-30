@@ -6,5 +6,6 @@ module.exports = {
     RequestManager: require("./rest/RequestManager")
   },
   GrowStocksClient: require("./structures/GrowStocksClient"),
-  GrowStocksUser: require("./structures/GrowStocksUser")
+  GrowStocksUser: require("./structures/GrowStocksUser"),
+  Transaction: require("./structures/Transaction")
 }

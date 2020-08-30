@@ -24,6 +24,9 @@ GSClient.on("warn", (warning) => {
   console.log(warning);
 });
 
+GSClient.getBalance().then(console.log);
+//GSClient.pay(9, 1, "Kisses.").then(console.log);
+
 app.get("/login", async (req, res) => {
   res.redirect(GSClient.authURL);
 });

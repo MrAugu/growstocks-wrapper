@@ -7,7 +7,9 @@ const pay = {
   base: "https://api.growstocks.xyz/v1/pay",
   createTransaction: "/transaction/create",
   authorize: (clientCode, payRedirectURL, transactionID) => `https://pay.growstocks.xyz/pay?client=${encodeURIComponent(clientCode)}&redirect_uri=${encodeURIComponent(payRedirectURL)}&transaction=${encodeURIComponent(transactionID)}`,
-  getTransaction: "/transaction/get"
+  getTransaction: "/transaction/get",
+  send: "/send",
+  balance: "/balance"
 };
 
 const OAuth = {

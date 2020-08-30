@@ -7,6 +7,12 @@ const GrowStocksClient = require("./GrowStocksClient");
  */
 class Transaction {
   constructor (data, client) {
+     /**
+     * The type of transaction, can be "send" or "receive".
+     * @type {string}
+     */
+    this.type = data.transaction.action === 5 ? "receive" : "send";
+
     /**
      * Status text - can be "Paid" or "Not Paid".
      * @type {string}
@@ -29,13 +35,13 @@ class Transaction {
      * The id of the user involved in this transaction.
      * @type {number}
      */
-    this.userid = data.transaction.user;
+    this.userid = this.type === "receive" ? data.transaction.user : data.transaction.party;
 
     /**
      * The id of the developer account.
      * @type {number}
      */
-    this.developerid = data.transaction.party;
+    this.developerid = this.type === "receive" ? data.transaction.party : data.transaction.user;
 
     /**
      * The amount of wls involved in this transaction.
@@ -47,7 +53,7 @@ class Transaction {
      * The date and time transaction has been created at.
      * @type {Date}
      */
-    this.createdAt = data.transaction.datetime;
+    this.createdAt = new Date(data.transaction.datetime);
 
     /**
      * Additional notes of the transactions.
