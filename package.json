@@ -1,0 +1,27 @@
+{
+  "name": "growstocks-wrapper",
+  "version": "1.0.0",
+  "description": "A fully fledged GrowStocks OAuth & Pay API wrapper for NodeJS.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MrAugu/growstocks-wrapper.git"
+  },
+  "keywords": [
+    "growstocks",
+    "growtopia",
+    "api",
+    "wrapper",
+    "oauth",
+    "pay"
+  ],
+  "author": "MrAugu",
+  "license": "SEE LICENSE IN LICENSE",
+  "bugs": {
+    "url": "https://github.com/MrAugu/growstocks-wrapper/issues"
+  },
+  "homepage": "https://github.com/MrAugu/growstocks-wrapper#readme"
+}
