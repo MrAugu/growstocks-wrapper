@@ -5,7 +5,13 @@ const auth = {
 
 const pay = {};
 
+const OAuth = {
+  base: "https://auth.growstocks.xyz",
+  authorize: (clientCode, scopes, redirectURL) => `/user/authorize?client=${encodeURIComponent(clientCode)}&scopes=${encodeURIComponent(scopes.join(","))}&redirect_uri=${encodeURIComponent(redirectURL)}`,
+};
+
 module.exports = {
   auth,
-  pay
+  pay,
+  OAuth
 }

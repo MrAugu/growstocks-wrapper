@@ -47,13 +47,27 @@ class GrowStocksClient {
      */
     this.redirectURL = options.redirectURL || null;
 
+    /**
+     * Array of scopes the organisation will ask for when logging in the user.
+     * @type {array[string]}
+     */
+    this.scopes = options.scopes.map(scope => scope.toLowerCase()) || null;
+
     if ([
       this.organisation,
       this.url,
       this.clientCode,
       this.secret,
-      this.redirectURL
-    ].some(property => property === null)) throw new TypeError("You must provide valid options keys (organisation, url, clientCode, secret, redirectURL) within the GrowStocksClient constructor.");
+      this.redirectURL,
+      this.scopes
+    ].some(property => property === null)) throw new TypeError("You must provide valid options keys (organisation, url, clientCode, secret, redirectURL, scopes) within the GrowStocksClient constructor.");
+
+    for (const scope of this.scopes) {
+      if (!["email", "profile", "balance"].includes(scope)) throw new TypeError(`Invalid scope ${scope} provided. Valid scopes are email, profile, balance.`);
+      else continue;
+    }
+
+    if (!(this.scopes.includes("balance") && this.scopes.includes("profile")) || !(this.scopes.includes("balance") && this.scopes.includes("email"))) throw new TypeError("The balance scope must be used with either profile or email.");
   }
 
   async exchangeAuthToken (authToken) {
@@ -66,6 +80,10 @@ class GrowStocksClient {
 
     const userData = await this.manager.push(exhangeRequest);
     return new GrowStocksUser(userData, authToken, this);
+  }
+
+  get authURL () {
+    return `${Endpoints.OAuth.base}${Endpoints.OAuth.authorize(this.clientCode, this.scopes, this.redirectURL)}`;
   }
 }
 
