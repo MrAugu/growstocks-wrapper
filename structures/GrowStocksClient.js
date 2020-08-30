@@ -2,6 +2,7 @@ const RequestManager = require("../rest/RequestManager");
 const Request = require("../rest/Request");
 const Endpoints = require("../rest/Endpoints");
 const GrowStocksUser = require("./GrowStocksUser");
+const FormData = require("form-data"); 
 
 /**
  * Represents a growstocks client.
@@ -28,13 +29,15 @@ class GrowStocksClient {
      * GrowStocks client code.
      * @type {string}
      */
-    this.clientCode = options.code || null;
+    this.clientCode = options.clientCode || null;
 
     /**
      * GrowStocks secret token.
      * @type {string}
      */
-    Object.defineProperty(this, "secret", options.secret);
+    Object.defineProperty(this, "secret", {
+      value: options.secret
+    });
 
     /**
      * This growstocks client's request manager.
@@ -67,18 +70,19 @@ class GrowStocksClient {
       else continue;
     }
 
-    if (!(this.scopes.includes("balance") && this.scopes.includes("profile")) || !(this.scopes.includes("balance") && this.scopes.includes("email"))) throw new TypeError("The balance scope must be used with either profile or email.");
+    if (this.scopes.includes("balance") && this.scopes.length < 2) throw new TypeError("The balance scope must be used with either profile or email scopes.");
   }
 
   async exchangeAuthToken (authToken) {
-    const exhangeRequest = new Request("post", `${Endpoints.auth.base}${Endpoints.auth.user}`, {
-      body: {
-        "secret": this.secret,
-        "token": authToken
-      }
-    });
+    const body = new FormData();
+    body.append("secret", this.secret);
+    body.append("token", authToken);
 
+    const exhangeRequest = new Request("post", `${Endpoints.auth.base}${Endpoints.auth.user}`, {
+      body: body
+    });
     const userData = await this.manager.push(exhangeRequest);
+
     return new GrowStocksUser(userData, authToken, this);
   }
 

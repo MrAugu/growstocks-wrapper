@@ -11,25 +11,25 @@ class GrowStocksUser {
      * GrowStocks user id.
      * @type {number}
      */
-    this.id = data.id || null;
+    this.id = data.user.id === undefined ? null : data.user.id;
 
     /**
      * The GrowStocks username of the user.
      * @type {string}
      */
-    this.name = data.name || null;
+    this.name = data.user.name === undefined ? null : data.user.name;
 
     /**
      * The growid of the user.
      * @type {string}
      */
-    this.growid = data.growid || null;
+    this.growid = data.user.growid === undefined ? null : data.user.growid;
 
     /**
      * GrowStocks Pay balance of this user.
      * @type {number}
      */
-    this.balance = data.balance || null;
+    this.balance = data.user.balance === undefined ? null : data.user.balance;
 
     /**
      * The authorized scopes for this user.
@@ -40,7 +40,9 @@ class GrowStocksUser {
     /**
      * The authorization token for this user.
      */
-    this.token = token;
+    Object.defineProperty(this, "token", {
+      value: token
+    });
 
     /**
      * GrowStocksClient that instantiated this user object.

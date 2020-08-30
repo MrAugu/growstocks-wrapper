@@ -26,21 +26,26 @@ class Request {
      */
     this.headers = options.headers || {};
 
-    
+    /**
+     * The options object used for later.
+     * @type {object}
+     */
+    this.options = options;
+
     if (!this.headers["User-Agent"]) Object.assign(this.headers, {
         "User-Agent": `GrowLancer (https://growlancer.xyz/, 0.0.1)`
     });
   }
 
   async send() {
-    console.log(this.body);
     const requestOptions = {
-      "method": this.method,
-      "headers": this.headers
+      "method": this.method
     };
 
-    if (!["get", "head"].includes(this.method)) requestOptions.body = JSON.stringify(this.body);
-  
+    if (this.options.stringify) requestOptions.body = JSON.stringify(this.body);
+    else requestOptions.body = this.body;
+    if (this.options.sendHeaders) requestOptions.headers = this.headers;
+
     return fetch(this.url, requestOptions);
   }
 }
