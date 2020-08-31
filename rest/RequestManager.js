@@ -35,7 +35,7 @@ class RequestManager {
     const { request, resolve, reject } = requestObject;
 
     const response = await request.send();
-
+    console.log(response.headers);
     if (response.ok) {
       resolve(await parseRequestOutputToJson(response));
     } else {
